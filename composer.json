@@ -1,0 +1,20 @@
+{
+  "name": "n1ghtcorrr/crryptov2",
+  "description": "crypto app",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "N1ghtcorrr\\Crryptov2\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "reinis ozolins"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {
+    "symfony/console": "^7.1",
+    "nesbot/carbon": "^3.5"
+  }
+}
