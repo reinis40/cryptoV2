@@ -5,10 +5,10 @@ use Symfony\Component\Console\Output\ConsoleOutput;
 
 class CryptoManager
 {
-    private $api;
-    private $wallet;
-    private $logger;
-    private $initialEur = 1000;
+    private ApiInterface $api;
+    public array $wallet;
+    public TransactionLogger $logger;
+    public int $initialEur = 1000;
 
     public function __construct(ApiInterface $api, TransactionLogger $logger)
     {
@@ -17,7 +17,7 @@ class CryptoManager
         $this->wallet = ['EUR' => $this->initialEur];
     }
 
-    public function showCrypto()
+    public function showCrypto(): void
     {
         $data = $this->api->getCryptoListings();
         $output = new ConsoleOutput();
@@ -33,15 +33,11 @@ class CryptoManager
         }
         $table->render();
     }
-
-    public function buyCrypto($symbol, $amountEUR)
+    public function buyCrypto($symbol, $amountEUR): void
     {
         $data = $this->api->getCryptoListings();
-var_dump($amountEUR);
-
-        $price = 0;
-        if (is_numeric($price))
-        {
+        //var_dump($amountEUR);
+        $price=0;
             foreach ($data as $crypto) {
                 if ($crypto['symbol'] == strtoupper($symbol)) {
 
@@ -49,9 +45,6 @@ var_dump($amountEUR);
                     break;
                 }
             }
-        }
-
-
         if (is_numeric($price)) {
             if ($this->wallet['EUR'] >= $amountEUR) {
                 $this->wallet['EUR'] -= $amountEUR;
@@ -69,7 +62,7 @@ var_dump($amountEUR);
             }
         }
     }
-    public function sellCrypto($symbol)
+    public function sellCrypto($symbol): void
     {
         $data = $this->api->getCryptoListings();
         $price = null;
@@ -95,7 +88,7 @@ var_dump($amountEUR);
             echo "Error: Crypto quote not found for symbol '$symbol'.\n";
         }
     }
-    public function showWallet()
+    public function showWallet(): void
     {
 
         $output = new ConsoleOutput();

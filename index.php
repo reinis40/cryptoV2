@@ -3,7 +3,7 @@
 require 'vendor/autoload.php';
 require 'ApiInterface.php';
 require 'CoinMarketCapApi.php';
-require 'coingeckoapi.php';
+require 'Coingeckoapi.php';
 require 'TransactionLogger.php';
 require 'CryptoManager.php';
 
@@ -13,11 +13,11 @@ use Carbon\Carbon;
 
 $dbFile = 'storage/database.sqlite';
 
-//$apiKey = "CG-477vkyBvF6onAz2YUz5LWPJ1";
-//$api = new CoingeckoApi();
+$apiKey = "CG-477vkyBvF6onAz2YUz5LWPJ1";
+$api = new CoingeckoApi();
 
-$apiKey = "ccb58a8c-61b0-4c84-8289-5e562a8476a1";
-$api = new CoinMarketCapApi($apiKey);
+//$apiKey = "ccb58a8c-61b0-4c84-8289-5e562a8476a1";
+//$api = new CoinMarketCapApi($apiKey);
 
 $logger = new TransactionLogger($dbFile);
 $cryptoManager = new CryptoManager($api, $logger);
