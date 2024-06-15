@@ -1,5 +1,4 @@
 <?php
-
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\ConsoleOutput;
 
@@ -33,47 +32,40 @@ class CryptoManager
         }
         $table->render();
     }
+
     public function buyCrypto($symbol, $amountEUR): void
     {
-        $data = $this->api->getCryptoListings();
-        //var_dump($amountEUR);
-        $price=0;
-            foreach ($data as $crypto) {
-                if ($crypto['symbol'] == strtoupper($symbol)) {
+        $crypto = $this->api->getCryptoBySymbol($symbol);
 
-                    $price = $crypto['quote'];
-                    break;
+        if ($crypto !== null) {
+            $price = $crypto['quote'];
+            if (is_numeric($price)) {
+                if ($this->wallet['EUR'] >= $amountEUR) {
+                    $this->wallet['EUR'] -= $amountEUR;
+                    $amountCrypto = $amountEUR / $price;
+
+                    if (!isset($this->wallet[$symbol])) {
+                        $this->wallet[$symbol] = 0;
+                    }
+                    $this->wallet[$symbol] += $amountCrypto;
+
+                    $this->logger->logTransaction('buy', $symbol, $amountCrypto, $amountEUR);
+                    echo "Bought $amountCrypto of $symbol at €$price each.\n";
+                } else {
+                    echo "Insufficient funds to buy €$amountEUR of $symbol.\n";
                 }
             }
-        if (is_numeric($price)) {
-            if ($this->wallet['EUR'] >= $amountEUR) {
-                $this->wallet['EUR'] -= $amountEUR;
-                $amountCrypto = $amountEUR / $price;
-
-                if (!isset($this->wallet[$symbol])) {
-                    $this->wallet[$symbol] = 0;
-                }
-                $this->wallet[$symbol] += $amountCrypto;
-
-                $this->logger->logTransaction('buy', $symbol, $amountCrypto, $amountEUR);
-                echo "Bought $amountCrypto of $symbol at €$price each.\n";
-            } else {
-                echo "Insufficient funds to buy €$amountEUR of $symbol.\n";
-            }
+        } else {
+            echo "Error: Crypto quote not found for symbol '$symbol'.\n";
         }
     }
+
     public function sellCrypto($symbol): void
     {
-        $data = $this->api->getCryptoListings();
-        $price = null;
-        foreach ($data as $crypto)
-        if ($crypto['symbol'] === strtoupper($symbol)) {
-            {
-                $price = $crypto['quote'];
-                break;
-            }
-        }
-        if ($price !== null) {
+        $crypto = $this->api->getCryptoBySymbol($symbol);
+
+        if ($crypto !== null) {
+            $price = $crypto['quote'];
             if (isset($this->wallet[$symbol]) && $this->wallet[$symbol] > 0) {
                 $amountCrypto = $this->wallet[$symbol];
                 $this->wallet['EUR'] += $amountCrypto * $price;
@@ -88,9 +80,9 @@ class CryptoManager
             echo "Error: Crypto quote not found for symbol '$symbol'.\n";
         }
     }
+
     public function showWallet(): void
     {
-
         $output = new ConsoleOutput();
         $table = new Table($output);
         $table->setHeaders(['Currency', 'Amount', 'Value in EUR']);
@@ -111,19 +103,14 @@ class CryptoManager
         if ($symbol == 'EUR') {
             return $amount;
         } else {
-            $data = $this->api->getCryptoListings();
-            foreach ($data as $crypto)
-            {
-                if ($crypto['symbol'] === ($symbol))
-                {
-                    $priceInEUR = $crypto['quote'];
-                }
+            $crypto = $this->api->getCryptoBySymbol($symbol);
+            if ($crypto !== null) {
+                $priceInEUR = $crypto['quote'];
+                return $amount * $priceInEUR;
             }
-
-            return $amount * $priceInEUR;
+            return 0; // Return 0 if the symbol is not found
         }
     }
 }
-
 
 

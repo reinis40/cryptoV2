@@ -3,7 +3,7 @@
 require 'vendor/autoload.php';
 require 'ApiInterface.php';
 require 'CoinMarketCapApi.php';
-require 'Coingeckoapi.php';
+require 'CoingeckoApi.php';
 require 'TransactionLogger.php';
 require 'CryptoManager.php';
 
@@ -13,17 +13,17 @@ use Carbon\Carbon;
 
 $dbFile = 'storage/database.sqlite';
 
-$apiKey = "CG-477vkyBvF6onAz2YUz5LWPJ1";
-$api = new CoingeckoApi();
+//$apiKey = "CG-477vkyBvF6onAz2YUz5LWPJ1";
+//$api = new CoingeckoApi();
 
-//$apiKey = "ccb58a8c-61b0-4c84-8289-5e562a8476a1";
-//$api = new CoinMarketCapApi($apiKey);
+$apiKey = "ccb58a8c-61b0-4c84-8289-5e562a8476a1";
+$api = new CoinMarketCapApi($apiKey);
 
 $logger = new TransactionLogger($dbFile);
 $cryptoManager = new CryptoManager($api, $logger);
 
 while (true) {
-    echo "\n1. List of crypto\n2. Buy\n3. Sell\n4. View wallet\n5. View logs\n6. Exit\n";
+    echo "\n1. List of crypto\n2. Buy\n3. Sell\n4. View wallet\n5. View logs\n6. Get Crypto by Symbol\n7. Exit\n";
     $input = readline("Select an option: ");
 
     switch ($input) {
@@ -46,6 +46,15 @@ while (true) {
             $logger->showTransactions();
             break;
         case 6:
+            $symbol = readline("Enter cryptocurrency symbol: ");
+            $crypto = $api->getCryptoBySymbol(strtoupper($symbol));
+            if ($crypto) {
+                echo "Name: {$crypto['name']}\nSymbol: {$crypto['symbol']}\nPrice: €{$crypto['quote']}\n";
+            } else {
+                echo "Cryptocurrency with symbol '$symbol' not found.\n";
+            }
+            break;
+        case 7:
             exit("Goodbye!\n");
         default:
             echo "Invalid option, please try again.\n";

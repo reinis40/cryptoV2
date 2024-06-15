@@ -34,7 +34,6 @@ class CoingeckoApi implements ApiInterface
             die('Curl error: ' . curl_error($curl));
         }
 
-
         curl_close($curl);
 
         $decodedResponse = json_decode($response, true);
@@ -70,9 +69,33 @@ class CoingeckoApi implements ApiInterface
 
         return $cryptoList;
     }
+
+    public function getCryptoBySymbol(string $symbol): ?array
+    {
+        $url = '/coins/markets';
+        $parameters = [
+              'vs_currency' => 'eur',
+              'order' => 'market_cap_desc',
+              'per_page' => 250,  // Increase limit to ensure symbol is found
+              'page' => 1,
+              'sparkline' => false
+        ];
+
+        $response = $this->getApiData($url, $parameters);
+
+        foreach ($response as $cryptoData) {
+            if (strtoupper($cryptoData['symbol']) === strtoupper($symbol)) {
+                return [
+                      'name' => $cryptoData['name'],
+                      'symbol' => strtoupper($cryptoData['symbol']),
+                      'quote' => $cryptoData['current_price']
+                ];
+            }
+        }
+
+        return null;
+    }
 }
-
-
 
 
 
